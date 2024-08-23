@@ -34,6 +34,7 @@ def test_scan_downloads_json():
             test_input,
             output_file,
             diskspaced.OutputFormat.JSON,
+            1,
         )
 
         with open(
@@ -62,11 +63,7 @@ def test_scan_downloads_grand_perspective():
     output_file = os.path.join(tempdir, "output.xml")
     test_input, expected_data_path = get_test_data("test_scan_downloads_gp")
 
-    diskspaced.scan(
-        test_input,
-        output_file,
-        diskspaced.OutputFormat.GRAND_PERSPECTIVE,
-    )
+    diskspaced.scan(test_input, output_file, diskspaced.OutputFormat.GRAND_PERSPECTIVE, 1)
 
     with open(
         output_file,
