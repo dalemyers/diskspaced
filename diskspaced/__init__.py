@@ -41,6 +41,9 @@ def _get_block_size(path: str) -> int:
 
 def _scan(folder_path: str, writer: Writer, process_in_order: bool) -> None:
 
+    if os.path.islink(folder_path):
+        return
+
     if os.path.isdir(folder_path):
 
         try:
@@ -74,9 +77,14 @@ def _scan(folder_path: str, writer: Writer, process_in_order: bool) -> None:
         _scan(folder, writer, process_in_order)
 
     for file_path, file_name in files:
+
+        if os.path.islink(file_path):
+            return
+
         try:
             file_details = os.stat(file_path)
         except FileNotFoundError:
+            # It could have been deleted in between scanning and processing
             continue
 
         writer.write_file(
