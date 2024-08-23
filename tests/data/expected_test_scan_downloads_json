@@ -1,0 +1,68 @@
+{
+"root_path": "/Users/dalemyers/Projects/diskspaced/tests/data/test_scan_downloads_json",
+"volume_size": 994662584320,
+"free_space": 319022854144,
+"used_space": 675639730176,
+"contents": [
+{
+"type": "folder",
+"name": "test_scan_downloads_json",
+"accessed": 1724420371,
+"modified": 1724420364,
+"created": 1724420364,
+"contents": [
+{
+"type": "folder",
+"name": "a",
+"accessed": 1724420381,
+"modified": 1724420375,
+"created": 1724420375,
+"contents": [
+{
+"type": "folder",
+"name": "b",
+"accessed": 1724420391,
+"modified": 1724420391,
+"created": 1724420391,
+"contents": [
+{
+"type": "folder",
+"name": "c",
+"accessed": 1724420389,
+"modified": 1724420389,
+"created": 1724420389,
+"contents": [
+{
+"type": "file",
+"name": "three.txt",
+"size": 4096,
+"accessed": 1724420389,
+"modified": 1724420389,
+"created": 1724420389
+}
+]
+},
+{
+"type": "file",
+"name": "two.txt",
+"size": 4096,
+"accessed": 1724420381,
+"modified": 1724420381,
+"created": 1724420391
+}
+]
+},
+{
+"type": "file",
+"name": "one.txt",
+"size": 4096,
+"accessed": 1724420371,
+"modified": 1724420371,
+"created": 1724420371
+}
+]
+}
+]
+}
+]
+}

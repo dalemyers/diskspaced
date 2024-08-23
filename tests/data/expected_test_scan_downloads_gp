@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GrandPerspectiveScanDump appVersion="4" formatVersion="7">
+    <ScanInfo volumePath="/Users/dalemyers/Projects/diskspaced/tests/data/test_scan_downloads_gp" volumeSize="994662584320" freeSpace="319055134720" scanTime="2024-08-23T13:58:23Z" fileSizeMeasure="physical">
+        <Folder name="a" created="2024-08-23T13:56:53Z" modified="2024-08-23T13:56:53Z" accessed="2024-08-23T13:56:53Z">
+            <File name="one.txt" size="4096" created="2024-08-23T13:56:53Z" modified="2024-08-23T13:58:13Z" accessed="2024-08-23T13:58:14Z" />
+            <Folder name="b" created="2024-08-23T13:56:53Z" modified="2024-08-23T13:56:53Z" accessed="2024-08-23T13:56:53Z">
+                <File name="two.txt" size="4096" created="2024-08-23T13:56:53Z" modified="2024-08-23T13:58:15Z" accessed="2024-08-23T13:58:17Z" />
+                <Folder name="c" created="2024-08-23T13:56:53Z" modified="2024-08-23T13:56:53Z" accessed="2024-08-23T13:56:53Z">
+                    <File name="three.txt" size="4096" created="2024-08-23T13:56:53Z" modified="2024-08-23T13:58:20Z" accessed="2024-08-23T13:58:21Z" />
+                </Folder>
+            </Folder>
+        </Folder>
+    </ScanInfo>
+</GrandPerspectiveScanDump>

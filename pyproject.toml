@@ -1,0 +1,45 @@
+[tool.poetry]
+name = "diskspaced"
+version = "0.0.1"
+description = "A utility for analyzing disk space via the CLI."
+
+license = "MIT"
+
+authors = [
+    "Dale Myers <dale@myers.io>"
+]
+
+readme = 'README.md'
+
+repository = "https://github.com/dalemyers/diskspaced"
+homepage = "https://github.com/dalemyers/diskspaced"
+
+keywords = ['diskspaced', 'disk', 'space', 'analyzer']
+
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries"
+]
+
+[tool.poetry.scripts]
+diskspaced = 'diskspaced:command_line.run'
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[tool.poetry.dev-dependencies]
+black = "=24.8.0"
+mypy = "=1.11.1"
+pylint = "=3.2.6"
+pytest = "=8.3.2"
+pytest-cov = "=5.0.0"
+
+[build-system]
+requires = ["poetry>=1.0"]
+build-backend = "poetry.masonry.api"
