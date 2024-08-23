@@ -50,6 +50,9 @@ def _scan(folder_path: str, writer: Writer, process_in_order: bool) -> None:
             folder_details = os.stat(folder_path)
         except FileNotFoundError:
             return
+        except OSError as e:
+            if e.errno == 13:  # Permission denied
+                return
 
         writer.write_folder_start(
             os.path.basename(folder_path),
@@ -79,13 +82,17 @@ def _scan(folder_path: str, writer: Writer, process_in_order: bool) -> None:
     for file_path, file_name in files:
 
         if os.path.islink(file_path):
-            return
+            continue
 
         try:
             file_details = os.stat(file_path)
         except FileNotFoundError:
             # It could have been deleted in between scanning and processing
             continue
+        except OSError as e:
+            if e.errno == 13:  # Permission denied
+                continue
+            raise
 
         writer.write_file(
             file_name,
@@ -99,7 +106,11 @@ def _scan(folder_path: str, writer: Writer, process_in_order: bool) -> None:
 
 
 def scan(
-    folder_path: str, output_path: str, output_format: OutputFormat, file_print_count: int
+    folder_path: str,
+    output_path: str,
+    output_format: OutputFormat,
+    file_print_count: int,
+    alphabetical: bool,
 ) -> None:
     """Scan the folder and write the results to the output path.
 
@@ -107,6 +118,7 @@ def scan(
     :param output_path: The path to write the results to
     :param output_format: The format to write the results in
     :param file_print_count: The number of files to print after. Zero disables printing.
+    :param alphabetical: Whether to process the files in alphabetical order
     """
 
     writer: Writer
@@ -123,6 +135,6 @@ def scan(
 
     writer.write_start(folder_path, disk_usage.total, disk_usage.used, disk_usage.free, block_size)
 
-    _scan(folder_path, writer, file_print_count != 0)
+    _scan(folder_path, writer, alphabetical)
 
     writer.write_end()

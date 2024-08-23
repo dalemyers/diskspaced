@@ -54,6 +54,15 @@ def _handle_arguments() -> int:
         help="Set this to print out the currently processed file after N files. Setting to 0 (the default) never prints.",
     )
 
+    parser.add_argument(
+        "--alphabetical",
+        dest="alphabetical",
+        action="store_true",
+        default=False,
+        required=False,
+        help="Set this to process the files in alphabetical order",
+    )
+
     args = parser.parse_args()
 
     try:
@@ -62,6 +71,7 @@ def _handle_arguments() -> int:
             args.output_path,
             diskspaced.OutputFormat(args.format),
             args.print_after_n_files,
+            args.alphabetical,
         )
     # pylint: disable=broad-except
     except Exception as e:
