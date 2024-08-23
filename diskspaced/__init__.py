@@ -42,7 +42,11 @@ def _get_block_size(path: str) -> int:
 def _scan(folder_path: str, writer: Writer, process_in_order: bool) -> None:
 
     if os.path.isdir(folder_path):
-        folder_details = os.stat(folder_path)
+
+        try:
+            folder_details = os.stat(folder_path)
+        except FileNotFoundError:
+            return
 
         writer.write_folder_start(
             os.path.basename(folder_path),
@@ -70,7 +74,11 @@ def _scan(folder_path: str, writer: Writer, process_in_order: bool) -> None:
         _scan(folder, writer, process_in_order)
 
     for file_path, file_name in files:
-        file_details = os.stat(file_path)
+        try:
+            file_details = os.stat(file_path)
+        except FileNotFoundError:
+            continue
+
         writer.write_file(
             file_name,
             file_details.st_size,
