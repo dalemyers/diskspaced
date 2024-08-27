@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "diskspaced"
-version = "0.0.3"
+version = "0.0.4"
 description = "A utility for analyzing disk space via the CLI."
 
 license = "MIT"
