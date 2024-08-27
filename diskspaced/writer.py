@@ -39,6 +39,7 @@ class Writer(abc.ABC):
     ) -> None:
         """Write the start of the output file."""
         self.file_count = 0
+        self.current_folder_path = root_path
 
     def write_end(self) -> None:
         """Write the end of the output file."""

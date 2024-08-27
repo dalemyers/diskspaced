@@ -46,23 +46,21 @@ def _scan(folder_path: str, writer: Writer, process_in_order: bool) -> None:
     if os.path.islink(folder_path):
         return
 
-    if os.path.isdir(folder_path):
-
-        try:
-            folder_details = os.stat(folder_path)
-        except FileNotFoundError:
+    try:
+        folder_details = os.stat(folder_path)
+    except FileNotFoundError:
+        return
+    except OSError as e:
+        if e.errno in ACCEPTABLE_OS_ERRORS:
             return
-        except OSError as e:
-            if e.errno in ACCEPTABLE_OS_ERRORS:
-                return
-            raise
+        raise
 
-        writer.write_folder_start(
-            os.path.basename(folder_path),
-            int(folder_details.st_atime),
-            int(folder_details.st_mtime),
-            int(folder_details.st_ctime),
-        )
+    writer.write_folder_start(
+        os.path.basename(folder_path),
+        int(folder_details.st_atime),
+        int(folder_details.st_mtime),
+        int(folder_details.st_ctime),
+    )
 
     files = []
     folders = []
@@ -152,7 +150,7 @@ def scan(
         _scan(folder_path, writer, alphabetical)
 
     if writer.depth != 0:
-        raise ValueError("Depth is not zero at end of scan")
+        raise ValueError(f"Depth is not zero at end of scan: {writer.depth}")
 
     writer.write_end()
 
