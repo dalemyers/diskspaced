@@ -5,22 +5,15 @@ import os
 import platform
 import shutil
 
+from diskspaced.constants import ACCEPTABLE_OS_ERRORS, MAX_RECURSION_LIMIT
 from diskspaced.writer import Writer
 from diskspaced.json_writer import JSONWriter
 from diskspaced.grand_perspective_writer import GrandPerspectiveWriter
+from diskspaced.temporary_recursion_limit import TemporaryRecursionLimit
 
 
 if platform.system() == "Windows":
     raise NotImplementedError("Windows is not supported by this tool.")
-
-
-ACCEPTABLE_OS_ERRORS = set(
-    [
-        1,  # Operation not permitted
-        9,  # Bad file descriptor
-        13,  # Permission denied
-    ]
-)
 
 
 class OutputFormat(enum.Enum):
@@ -155,7 +148,11 @@ def scan(
 
     writer.write_start(folder_path, disk_usage.total, disk_usage.used, disk_usage.free, block_size)
 
-    _scan(folder_path, writer, alphabetical)
+    with TemporaryRecursionLimit(10000):
+        _scan(folder_path, writer, alphabetical)
+
+    if writer.depth != 0:
+        raise ValueError("Depth is not zero at end of scan")
 
     writer.write_end()
 
