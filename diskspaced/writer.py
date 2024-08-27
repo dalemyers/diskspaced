@@ -2,6 +2,7 @@
 
 import abc
 from io import IOBase
+import logging
 import os
 
 
@@ -52,4 +53,4 @@ class Writer(abc.ABC):
         self.file_count += 1
 
         if self.file_print_count != 0 and self.file_count % self.file_print_count == 0:
-            print(os.path.join(self.current_folder_path, file_name))
+            logging.info(f"Processing {os.path.join(self.current_folder_path, file_name)}")

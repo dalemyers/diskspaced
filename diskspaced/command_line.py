@@ -66,6 +66,8 @@ def _handle_arguments() -> int:
 
     args = parser.parse_args()
 
+    logging.basicConfig(level=logging.INFO)
+
     try:
         diskspaced.scan(
             args.folder_path,

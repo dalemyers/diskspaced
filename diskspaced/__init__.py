@@ -16,8 +16,9 @@ if platform.system() == "Windows":
 
 ACCEPTABLE_OS_ERRORS = set(
     [
-        13,  # Permission denied
+        1,  # Operation not permitted
         9,  # Bad file descriptor
+        13,  # Permission denied
     ]
 )
 
