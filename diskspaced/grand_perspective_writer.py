@@ -95,7 +95,7 @@ class GrandPerspectiveWriter(writer.Writer):
         self.file.write(GrandPerspectiveWriter.FOLDER_OPEN)
 
         self.file.write(GrandPerspectiveWriter.ATTR_NAME)
-        self.file.write(folder_name.encode("utf-8"))
+        self.file.write(GrandPerspectiveWriter.safe_attr(folder_name))
         self.file.write(GrandPerspectiveWriter.ATTR_CLOSE)
 
         self.file.write(GrandPerspectiveWriter.ATTR_CREATED)
