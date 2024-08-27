@@ -205,18 +205,7 @@ class GrandPerspectiveWriter(writer.Writer):
 
         super().pretty_print()
 
-        logging.info("Formatting...")
-
-        with tempfile.TemporaryDirectory() as temp_folder:
-            tempfile_name = "unformatted.xml"
-            tempfile_path = os.path.join(temp_folder, tempfile_name)
-            shutil.copy(self.output_path, tempfile_path)
-
-            with open(self.output_path, "wb") as output_file:
-                parser = xml.sax.make_parser()
-                formatter = XMLFormatter(output_file)
-                parser.setContentHandler(formatter)
-                parser.parse(tempfile_path)
+        _format(self.output_path)
 
 
 class XMLFormatter(xml.sax.ContentHandler):
@@ -254,7 +243,9 @@ class XMLFormatter(xml.sax.ContentHandler):
         self.output_file.write((" " * 4 * self.indent_level).encode("utf-8"))
         self.output_file.write(f"<{name}".encode("utf-8"))
         for attr, value in attrs.items():
-            self.output_file.write(f' {attr}="{value}"'.encode("utf-8"))
+            self.output_file.write(
+                f' {attr}="{GrandPerspectiveWriter.safe_attr(value)}"'.encode("utf-8")
+            )
         self.output_file.write(">\n".encode("utf-8"))
         self.indent_level += 1
         self.had_contents.append((XMLFormatter.get_name(name, attrs), False))
@@ -271,3 +262,18 @@ class XMLFormatter(xml.sax.ContentHandler):
         self.output_file.write(f"</{name}>\n".encode("utf-8"))
 
         self.had_contents.pop()
+
+
+def _format(input_file_path: str) -> None:
+    logging.info("Formatting...")
+
+    with tempfile.TemporaryDirectory() as temp_folder:
+        tempfile_name = "unformatted.xml"
+        tempfile_path = os.path.join(temp_folder, tempfile_name)
+        shutil.copy(input_file_path, tempfile_path)
+
+        with open(input_file_path, "wb") as output_file:
+            parser = xml.sax.make_parser()
+            formatter = XMLFormatter(output_file)
+            parser.setContentHandler(formatter)
+            parser.parse(tempfile_path)
