@@ -3,6 +3,7 @@
 """Command line handler for diskspaced."""
 
 import argparse
+import logging
 import os
 import sys
 
@@ -76,7 +77,7 @@ def _handle_arguments() -> int:
     # pylint: disable=broad-except
     except Exception as e:
         # pylint: enable=broad-except
-        print(f"Error: {e}")
+        logging.error(f"{e}", exc_info=True)
         return 1
 
     return 0
