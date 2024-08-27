@@ -6,6 +6,7 @@ import platform
 import shutil
 
 from diskspaced.constants import ACCEPTABLE_OS_ERRORS, MAX_RECURSION_LIMIT
+from diskspaced.defer import defer
 from diskspaced.writer import Writer
 from diskspaced.json_writer import JSONWriter
 from diskspaced.grand_perspective_writer import GrandPerspectiveWriter
@@ -62,57 +63,58 @@ def _scan(folder_path: str, writer: Writer, process_in_order: bool) -> None:
         int(folder_details.st_ctime),
     )
 
-    files = []
-    folders = []
+    with defer() as d:
+        d(writer.write_folder_end)
 
-    try:
-        items = os.listdir(folder_path)
-    except FileNotFoundError:
-        return
-    except OSError as e:
-        if e.errno in ACCEPTABLE_OS_ERRORS:
-            return
-        raise
-
-    for item in items:
-        full_path = os.path.join(folder_path, item)
-
-        if os.path.isdir(full_path):
-            folders.append(full_path)
-        else:
-            files.append((full_path, item))
-
-    if process_in_order:
-        folders.sort()
-        files.sort(key=lambda x: x[1])
-
-    for folder in folders:
-        _scan(folder, writer, process_in_order)
-
-    for file_path, file_name in files:
-
-        if os.path.islink(file_path):
-            continue
+        files = []
+        folders = []
 
         try:
-            file_details = os.stat(file_path)
+            items = os.listdir(folder_path)
         except FileNotFoundError:
-            # It could have been deleted in between scanning and processing
-            continue
+            return
         except OSError as e:
             if e.errno in ACCEPTABLE_OS_ERRORS:
-                continue
+                return
             raise
 
-        writer.write_file(
-            file_name,
-            file_details.st_size,
-            int(file_details.st_atime),
-            int(file_details.st_mtime),
-            int(file_details.st_ctime),
-        )
+        for item in items:
+            full_path = os.path.join(folder_path, item)
 
-    writer.write_folder_end()
+            if os.path.isdir(full_path):
+                folders.append(full_path)
+            else:
+                files.append((full_path, item))
+
+        if process_in_order:
+            folders.sort()
+            files.sort(key=lambda x: x[1])
+
+        for folder in folders:
+            _scan(folder, writer, process_in_order)
+
+        for file_path, file_name in files:
+
+            if os.path.islink(file_path):
+                continue
+
+            try:
+                file_details = os.stat(file_path)
+            except FileNotFoundError:
+                # It could have been deleted in between scanning and processing
+                continue
+            except OSError as e:
+                if e.errno in ACCEPTABLE_OS_ERRORS:
+                    continue
+                raise
+
+            writer.write_file(
+                file_name,
+                file_details.st_size,
+                int(file_details.st_atime),
+                int(file_details.st_mtime),
+                int(file_details.st_ctime),
+            )
 
 
 def scan(
