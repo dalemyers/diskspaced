@@ -68,7 +68,13 @@ class Writer(abc.ABC):
         self.depth -= 1
 
     def write_file(
-        self, file_name: str, size: int, accessed_time: int, modified_time: int, created_time: int
+        self,
+        file_name: str,
+        size: int,
+        size_on_disk: int,
+        accessed_time: int,
+        modified_time: int,
+        created_time: int,
     ) -> None:
         """Write the start of a file entry."""
         self.file_count += 1

@@ -108,9 +108,16 @@ def _scan(folder_path: str, writer: Writer, process_in_order: bool) -> None:
                     continue
                 raise
 
+            size_on_disk = (
+                (file_details.st_size + file_details.st_blksize - 1)
+                // file_details.st_blksize
+                * file_details.st_blksize
+            )
+
             writer.write_file(
                 file_name,
                 file_details.st_size,
+                size_on_disk,
                 int(file_details.st_atime),
                 int(file_details.st_mtime),
                 int(file_details.st_ctime),

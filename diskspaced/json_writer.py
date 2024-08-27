@@ -28,6 +28,7 @@ class JSONWriter(writer.Writer):
     TYPE_FOLDER = '"type": "folder", '.encode("utf-8")
     FIELD_NAME = '"name": "'.encode("utf-8")
     FIELD_SIZE = '"size": '.encode("utf-8")
+    FIELD_SIZE_ON_DISK = '"size_on_disk": '.encode("utf-8")
     FIELD_ACCESSED = '"accessed": '.encode("utf-8")
     FIELD_MODIFIED = '"modified": '.encode("utf-8")
     FIELD_CREATED = '"created": '.encode("utf-8")
@@ -119,11 +120,19 @@ class JSONWriter(writer.Writer):
             self.file.flush()
 
     def write_file(
-        self, file_name: str, size: int, accessed_time: int, modified_time: int, created_time: int
+        self,
+        file_name: str,
+        size: int,
+        size_on_disk: int,
+        accessed_time: int,
+        modified_time: int,
+        created_time: int,
     ) -> None:
         """Write the start of a file entry."""
 
-        super().write_file(file_name, size, accessed_time, modified_time, created_time)
+        super().write_file(
+            file_name, size, size_on_disk, accessed_time, modified_time, created_time
+        )
 
         self.file.write(JSONWriter.OPEN_BRACE)
         self.file.write(JSONWriter.TYPE_FILE)
@@ -133,7 +142,11 @@ class JSONWriter(writer.Writer):
         self.file.write(JSONWriter.STRING_COMMA)
 
         self.file.write(JSONWriter.FIELD_SIZE)
-        self.file.write(str(max(self.block_size, size)).encode("utf-8"))
+        self.file.write(str(size).encode("utf-8"))
+        self.file.write(JSONWriter.COMMA)
+
+        self.file.write(JSONWriter.FIELD_SIZE_ON_DISK)
+        self.file.write(str(size_on_disk).encode("utf-8"))
         self.file.write(JSONWriter.COMMA)
 
         self.file.write(JSONWriter.FIELD_ACCESSED)

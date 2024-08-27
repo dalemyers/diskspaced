@@ -143,11 +143,19 @@ class GrandPerspectiveWriter(writer.Writer):
             self.file.flush()
 
     def write_file(
-        self, file_name: str, size: int, accessed_time: int, modified_time: int, created_time: int
+        self,
+        file_name: str,
+        size: int,
+        size_on_disk: int,
+        accessed_time: int,
+        modified_time: int,
+        created_time: int,
     ) -> None:
         """Write the start of a file entry."""
 
-        super().write_file(file_name, size, accessed_time, modified_time, created_time)
+        super().write_file(
+            file_name, size, size_on_disk, accessed_time, modified_time, created_time
+        )
 
         self.file.write(GrandPerspectiveWriter.FILE_OPEN)
 
@@ -156,7 +164,7 @@ class GrandPerspectiveWriter(writer.Writer):
         self.file.write(GrandPerspectiveWriter.ATTR_CLOSE)
 
         self.file.write(GrandPerspectiveWriter.ATTR_SIZE)
-        self.file.write(str(min(self.block_size, size)).encode("utf-8"))
+        self.file.write(str(size_on_disk).encode("utf-8"))
         self.file.write(GrandPerspectiveWriter.ATTR_CLOSE)
 
         self.file.write(GrandPerspectiveWriter.ATTR_CREATED)
