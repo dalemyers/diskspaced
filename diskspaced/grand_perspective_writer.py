@@ -1,7 +1,12 @@
 """A CLI tool for checking disk space."""
 
 import datetime
+from io import IOBase
+import logging
 import os
+import shutil
+import tempfile
+import xml.sax
 
 from diskspaced import writer
 
@@ -194,3 +199,75 @@ class GrandPerspectiveWriter(writer.Writer):
         return (
             value.replace("&", "&amp;").replace("<", "&lt;").replace('"', "&quot;").encode("utf-8")
         )
+
+    def pretty_print(self) -> None:
+        """Pretty print the output."""
+
+        super().pretty_print()
+
+        logging.info("Formatting...")
+
+        with tempfile.TemporaryDirectory() as temp_folder:
+            tempfile_name = "unformatted.xml"
+            tempfile_path = os.path.join(temp_folder, tempfile_name)
+            shutil.copy(self.output_path, tempfile_path)
+
+            with open(self.output_path, "wb") as output_file:
+                parser = xml.sax.make_parser()
+                formatter = XMLFormatter(output_file)
+                parser.setContentHandler(formatter)
+                parser.parse(tempfile_path)
+
+
+class XMLFormatter(xml.sax.ContentHandler):
+    """Format XML output for disk usage."""
+
+    indent_level: int
+    output_file: IOBase
+    had_contents: list[tuple[str, bool]]
+
+    def __init__(self, output_file: IOBase) -> None:
+        self.indent_level = 0
+        self.output_file = output_file
+        self.had_contents = []
+
+        self.output_file.write('<?xml version="1.0" encoding="UTF-8"?>\n'.encode("utf-8"))
+
+        super().__init__()
+
+    @staticmethod
+    def get_name(name: str, attrs) -> str:
+        """Get the name from the attributes if it exists.
+
+        Returns the name of the element if it doesn't.
+
+        :param name: The name of the element
+        :param attrs: The attributes of the element
+
+        :return: The name of the element
+        """
+        if "name" in attrs:
+            return attrs["name"]
+        return name
+
+    def startElement(self, name, attrs):
+        self.output_file.write((" " * 4 * self.indent_level).encode("utf-8"))
+        self.output_file.write(f"<{name}".encode("utf-8"))
+        for attr, value in attrs.items():
+            self.output_file.write(f' {attr}="{value}"'.encode("utf-8"))
+        self.output_file.write(">\n".encode("utf-8"))
+        self.indent_level += 1
+        self.had_contents.append((XMLFormatter.get_name(name, attrs), False))
+
+        if len(self.had_contents) > 1:
+            self.had_contents[-2] = (self.had_contents[-2][0], True)
+
+    def endElement(self, name):
+        self.indent_level -= 1
+        if not self.had_contents[-1][1]:
+            self.output_file.seek(-1, 1)
+        else:
+            self.output_file.write((" " * 4 * self.indent_level).encode("utf-8"))
+        self.output_file.write(f"</{name}>\n".encode("utf-8"))
+
+        self.had_contents.pop()

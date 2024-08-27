@@ -130,6 +130,7 @@ def scan(
     output_format: OutputFormat,
     file_print_count: int,
     alphabetical: bool,
+    pretty_print: bool = False,
 ) -> None:
     """Scan the folder and write the results to the output path.
 
@@ -157,3 +158,6 @@ def scan(
     _scan(folder_path, writer, alphabetical)
 
     writer.write_end()
+
+    if pretty_print:
+        writer.pretty_print()

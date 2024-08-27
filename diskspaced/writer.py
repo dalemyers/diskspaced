@@ -54,3 +54,7 @@ class Writer(abc.ABC):
 
         if self.file_print_count != 0 and self.file_count % self.file_print_count == 0:
             logging.info(f"Processing {os.path.join(self.current_folder_path, file_name)}")
+
+    def pretty_print(self) -> None:
+        """Pretty print the output."""
+        pass

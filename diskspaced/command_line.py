@@ -46,6 +46,15 @@ def _handle_arguments() -> int:
     )
 
     parser.add_argument(
+        "--pretty-print",
+        dest="pretty_print",
+        action="store_true",
+        default=False,
+        required=False,
+        help="Set this to pretty print the output (if supported by the format)",
+    )
+
+    parser.add_argument(
         "--print-after-n-files",
         dest="print_after_n_files",
         action="store",
@@ -75,6 +84,7 @@ def _handle_arguments() -> int:
             diskspaced.OutputFormat(args.format),
             args.print_after_n_files,
             args.alphabetical,
+            args.pretty_print,
         )
     # pylint: disable=broad-except
     except Exception as e:
