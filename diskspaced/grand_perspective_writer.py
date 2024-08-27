@@ -100,7 +100,7 @@ class GrandPerspectiveWriter(writer.Writer):
         self.file.write(GrandPerspectiveWriter.FOLDER_OPEN)
 
         self.file.write(GrandPerspectiveWriter.ATTR_NAME)
-        self.file.write(GrandPerspectiveWriter.safe_attr(folder_name))
+        self.file.write(GrandPerspectiveWriter.safe_attr(folder_name).encode("utf-8"))
         self.file.write(GrandPerspectiveWriter.ATTR_CLOSE)
 
         self.file.write(GrandPerspectiveWriter.ATTR_CREATED)
@@ -152,7 +152,7 @@ class GrandPerspectiveWriter(writer.Writer):
         self.file.write(GrandPerspectiveWriter.FILE_OPEN)
 
         self.file.write(GrandPerspectiveWriter.ATTR_NAME)
-        self.file.write(GrandPerspectiveWriter.safe_attr(file_name))
+        self.file.write(GrandPerspectiveWriter.safe_attr(file_name).encode("utf-8"))
         self.file.write(GrandPerspectiveWriter.ATTR_CLOSE)
 
         self.file.write(GrandPerspectiveWriter.ATTR_SIZE)
@@ -189,16 +189,14 @@ class GrandPerspectiveWriter(writer.Writer):
             self.file.flush()
 
     @staticmethod
-    def safe_attr(value: str) -> bytes:
+    def safe_attr(value: str) -> str:
         """Make sure the value is safe to write as an attribute.
 
         :param value: The value to make safe
 
         :return: The safe value
         """
-        return (
-            value.replace("&", "&amp;").replace("<", "&lt;").replace('"', "&quot;").encode("utf-8")
-        )
+        return value.replace("&", "&amp;").replace("<", "&lt;").replace('"', "&quot;")
 
     def pretty_print(self) -> None:
         """Pretty print the output."""
