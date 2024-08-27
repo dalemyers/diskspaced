@@ -14,6 +14,14 @@ if platform.system() == "Windows":
     raise NotImplementedError("Windows is not supported by this tool.")
 
 
+ACCEPTABLE_OS_ERRORS = set(
+    [
+        13,  # Permission denied
+        9,  # Bad file descriptor
+    ]
+)
+
+
 class OutputFormat(enum.Enum):
     """Represents the output format for the scan results."""
 
@@ -51,7 +59,7 @@ def _scan(folder_path: str, writer: Writer, process_in_order: bool) -> None:
         except FileNotFoundError:
             return
         except OSError as e:
-            if e.errno == 13:  # Permission denied
+            if e.errno in ACCEPTABLE_OS_ERRORS:
                 return
             raise
 
@@ -70,7 +78,7 @@ def _scan(folder_path: str, writer: Writer, process_in_order: bool) -> None:
     except FileNotFoundError:
         return
     except OSError as e:
-        if e.errno == 13:  # Permission denied
+        if e.errno in ACCEPTABLE_OS_ERRORS:
             return
         raise
 
@@ -100,7 +108,7 @@ def _scan(folder_path: str, writer: Writer, process_in_order: bool) -> None:
             # It could have been deleted in between scanning and processing
             continue
         except OSError as e:
-            if e.errno == 13:  # Permission denied
+            if e.errno in ACCEPTABLE_OS_ERRORS:
                 continue
             raise
 
