@@ -53,6 +53,7 @@ def _scan(folder_path: str, writer: Writer, process_in_order: bool) -> None:
         except OSError as e:
             if e.errno == 13:  # Permission denied
                 return
+            raise
 
         writer.write_folder_start(
             os.path.basename(folder_path),
@@ -64,7 +65,16 @@ def _scan(folder_path: str, writer: Writer, process_in_order: bool) -> None:
     files = []
     folders = []
 
-    for item in os.listdir(folder_path):
+    try:
+        items = os.listdir(folder_path)
+    except FileNotFoundError:
+        return
+    except OSError as e:
+        if e.errno == 13:  # Permission denied
+            return
+        raise
+
+    for item in items:
         full_path = os.path.join(folder_path, item)
 
         if os.path.isdir(full_path):
