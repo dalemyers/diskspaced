@@ -147,7 +147,7 @@ class GrandPerspectiveWriter(writer.Writer):
         self.file.write(GrandPerspectiveWriter.FILE_OPEN)
 
         self.file.write(GrandPerspectiveWriter.ATTR_NAME)
-        self.file.write(file_name.encode("utf-8"))
+        self.file.write(GrandPerspectiveWriter.safe_attr(file_name))
         self.file.write(GrandPerspectiveWriter.ATTR_CLOSE)
 
         self.file.write(GrandPerspectiveWriter.ATTR_SIZE)
@@ -182,3 +182,15 @@ class GrandPerspectiveWriter(writer.Writer):
 
         if os.environ.get("PYTEST_CURRENT_TEST"):
             self.file.flush()
+
+    @staticmethod
+    def safe_attr(value: str) -> bytes:
+        """Make sure the value is safe to write as an attribute.
+
+        :param value: The value to make safe
+
+        :return: The safe value
+        """
+        return (
+            value.replace("&", "&amp;").replace("<", "&lt;").replace('"', "&quot;").encode("utf-8")
+        )
