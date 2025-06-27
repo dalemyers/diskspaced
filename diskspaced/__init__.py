@@ -22,6 +22,7 @@ class OutputFormat(enum.Enum):
 
     JSON = "json"
     GRAND_PERSPECTIVE = "grandperspective"
+    COMPRESSED_GRAND_PERSPECTIVE = "grandperspective.gz"
 
 
 def _get_block_size(path: str) -> int:
@@ -146,14 +147,18 @@ def scan(
     if output_format == OutputFormat.JSON:
         writer = JSONWriter(output_path, file_print_count)
     elif output_format == OutputFormat.GRAND_PERSPECTIVE:
-        writer = GrandPerspectiveWriter(output_path, file_print_count)
+        writer = GrandPerspectiveWriter(output_path, file_print_count, compressed=False)
+    elif output_format == OutputFormat.COMPRESSED_GRAND_PERSPECTIVE:
+        writer = GrandPerspectiveWriter(output_path, file_print_count, compressed=True)
     else:
         raise ValueError(f"Unknown output format: {output_format}")
 
     disk_usage = shutil.disk_usage(folder_path)
     block_size = _get_block_size(folder_path)
 
-    writer.write_start(folder_path, disk_usage.total, disk_usage.used, disk_usage.free, block_size)
+    writer.write_start(
+        folder_path, disk_usage.total, disk_usage.used, disk_usage.free, block_size
+    )
 
     with TemporaryRecursionLimit(10000):
         _scan(folder_path, writer, alphabetical)

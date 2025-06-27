@@ -1,6 +1,7 @@
 """A CLI tool for checking disk space."""
 
 import datetime
+import gzip
 from io import IOBase
 import logging
 import os
@@ -46,6 +47,18 @@ class GrandPerspectiveWriter(writer.Writer):
     ATTR_MODIFIED = 'modified="'.encode("utf-8")
     ATTR_ACCESSED = 'accessed="'.encode("utf-8")
 
+    compressed: bool
+
+    def __init__(
+        self, output_path: str, file_print_count: int, *, compressed: bool = False
+    ) -> None:
+        """Initialize the GrandPerspectiveWriter.
+
+        :param output_path: The path to write the output to
+        """
+        super().__init__(output_path, file_print_count)
+        self.compressed = compressed
+
     def write_start(
         self,
         root_path: str,
@@ -61,7 +74,10 @@ class GrandPerspectiveWriter(writer.Writer):
 
         # pylint: disable=consider-using-with
         self.block_size = block_size
-        self.file = open(self.output_path, "wb")
+        if self.compressed:
+            self.file = gzip.open(self.output_path, "wb")
+        else:
+            self.file = open(self.output_path, "wb")
         # pylint: enable=consider-using-with
 
         if not root_path.endswith("/"):
@@ -73,7 +89,9 @@ class GrandPerspectiveWriter(writer.Writer):
         # This only happens once, so we don't bother caching the encoded values
         self.file.write('<?xml version="1.0" encoding="UTF-8"?>\n'.encode("utf-8"))
         self.file.write(
-            '  <GrandPerspectiveScanDump appVersion="4" formatVersion="7">\n'.encode("utf-8")
+            '  <GrandPerspectiveScanDump appVersion="4" formatVersion="7">\n'.encode(
+                "utf-8"
+            )
         )
         self.file.write(
             f'    <ScanInfo volumePath="{root_path}" volumeSize="{disk_usage_total}" freeSpace="{disk_usage_free}" scanTime="{scan_time}" fileSizeMeasure="physical">\n'.encode(
@@ -91,11 +109,17 @@ class GrandPerspectiveWriter(writer.Writer):
         self.file.close()
 
     def write_folder_start(
-        self, folder_name: str, accessed_time: int, modified_time: int, created_time: int
+        self,
+        folder_name: str,
+        accessed_time: int,
+        modified_time: int,
+        created_time: int,
     ) -> None:
         """Write the start of a folder entry."""
 
-        super().write_folder_start(folder_name, accessed_time, modified_time, created_time)
+        super().write_folder_start(
+            folder_name, accessed_time, modified_time, created_time
+        )
 
         self.file.write(GrandPerspectiveWriter.FOLDER_OPEN)
 
@@ -211,7 +235,10 @@ class GrandPerspectiveWriter(writer.Writer):
 
         super().pretty_print()
 
-        _format(self.output_path)
+        if self.compressed:
+            _format_compressed(self.output_path)
+        else:
+            _format(self.output_path)
 
 
 class XMLFormatter(xml.sax.ContentHandler):
@@ -226,7 +253,9 @@ class XMLFormatter(xml.sax.ContentHandler):
         self.output_file = output_file
         self.had_contents = []
 
-        self.output_file.write('<?xml version="1.0" encoding="UTF-8"?>\n'.encode("utf-8"))
+        self.output_file.write(
+            '<?xml version="1.0" encoding="UTF-8"?>\n'.encode("utf-8")
+        )
 
         super().__init__()
 
@@ -283,3 +312,28 @@ def _format(input_file_path: str) -> None:
             formatter = XMLFormatter(output_file)
             parser.setContentHandler(formatter)
             parser.parse(tempfile_path)
+
+
+def _format_compressed(input_file_path: str) -> None:
+    logging.info("Formatting compressed file...")
+
+    with tempfile.TemporaryDirectory() as temp_folder:
+        uncompressed_temp_path = os.path.join(temp_folder, "uncompressed.xml")
+        formatted_temp_path = os.path.join(temp_folder, "formatted.xml")
+
+        # Decompress
+        with gzip.open(input_file_path, "rb") as f_in:
+            with open(uncompressed_temp_path, "wb") as f_out:
+                shutil.copyfileobj(f_in, f_out)
+
+        # Format
+        with open(formatted_temp_path, "wb") as output_file:
+            parser = xml.sax.make_parser()
+            formatter = XMLFormatter(output_file)
+            parser.setContentHandler(formatter)
+            parser.parse(uncompressed_temp_path)
+
+        # Re-compress
+        with open(formatted_temp_path, "rb") as f_in:
+            with gzip.open(input_file_path, "wb") as f_out:
+                shutil.copyfileobj(f_in, f_out)
